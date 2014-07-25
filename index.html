@@ -201,7 +201,8 @@
     };
 
   $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-    options.url = 'http://rt-node-tests.herokuapp.com' + options.url;
+    //options.url = 'http://localhost:5000' + options.url;
+    options.url = 'http://student-donor-service.herokuapp.com' + options.url;
   });
 
   var HomeView = Backbone.View.extend({
