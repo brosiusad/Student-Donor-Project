@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Student Donation Manager</title>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
+  <style type="text/css">
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="col-md-6" style="margin-top: 20px">
+        <ul class="nav nav-pills" >
+            <li id="home-tab" class="active"><a href="#">Home</a></li>
+            <li id="students-tab"><a href="#/students">Students</a></li>
+            <li id="donors-tab"><a href="#/donors">Donors</a></li>
+        </ul>
+        </div>
+        <div class="col-offset-md-6" style="text-align: right">
+         <h1>Donation Manager</h1>
+        </div>
+    <div class="page"></div>
+  </div>
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js" type="text/javascript"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+
+<!-- Templates -->
+
+  <script type="text/template" id="student-list-template">
+  <div style="float: right">
+    <a href="#/students/new" class="btn btn-success">New Student</a>
+  </div>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>First Name</th><th>Last Name</th><th>Age</th><th>City</th><th>State</th><th>Zip</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(students, function(student) { %>
+      <tr>
+        <td><%- student.get('firstname') %></td>
+        <td><%- student.get('lastname') %></td>
+        <td><%- student.get('age') %></td>
+        <td><%- student.get('city') %></td>
+        <td><%- student.get('state') %></td>
+        <td><%- student.get('zip') %></td>
+        <td><a href="#/students/edit/<%= student.id %>" class="btn btn-default btn-xs">Edit</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </script>
+
+  <script type="text/template" id="donor-list-template">
+    <div style="float: right">
+    <a href="#/donors/new" class="btn btn-success">New Donor</a>
+    </div>
+    <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>First Name</th><th>Last Name</th><th>City</th><th>State</th><th>Zip</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(donors, function(donor) { %>
+      <tr>
+        <td><%- donor.get('firstname') %></td>
+        <td><%- donor.get('lastname') %></td>
+        <td><%- donor.get('city') %></td>
+        <td><%- donor.get('state') %></td>
+        <td><%- donor.get('zip') %></td>
+        <td><a href="#/donors/edit/<%= donor.id %>" class="btn btn-default btn-xs">Edit</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </script>
+
+  <script type="text/template" id="student-edit-template">
+  <form id="edit-student-form" class="form-horizontal" role="form">
+    <div class="col-sm-offset-2 col-sm-10">
+        <legend><%= student ? 'Edit' : 'Create' %> Student</legend>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-10">
+            <input type="text" name="firstname" class="form-control" value="<%= student ? student.get('firstname') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-10">
+            <input type="text" name="lastname" class="form-control" value="<%= student ? student.get('lastname') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Age</label>
+        <div class="col-sm-10">
+            <input type="text" name="age" class="form-control" value="<%= student ? student.get('age') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">City</label>
+        <div class="col-sm-10">
+            <input type="text" name="city" class="form-control" value="<%= student ? student.get('city') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">State</label>
+        <div class="col-sm-10">
+            <input type="text" name="state" class="form-control" value="<%= student ? student.get('state') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Zip</label>
+        <div class="col-sm-10">
+            <input type="text" name="zip" class="form-control" value="<%= student ? student.get('zip') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Save</button>
+            <% if (student) { %>
+                <input type="hidden" name="id" value="<%= student.id %>" />
+                <button id="student-delete-button" type="button" class="btn btn-danger">Delete</button>
+            <% } %>
+        </div>
+    </div>
+  </form>
+  </script>
+
+
+  <script type="text/template" id="donor-edit-template">
+  <form id="edit-donor-form" class="form-horizontal" role="form">
+    <div class="col-sm-offset-2 col-sm-10">
+        <legend><%= donor ? 'Edit' : 'Create' %> Donor</legend>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-10">
+            <input type="text" name="firstname" class="form-control" value="<%= donor ? donor.get('firstname') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-10">
+            <input type="text" name="lastname" class="form-control" value="<%= donor ? donor.get('lastname') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">City</label>
+        <div class="col-sm-10">
+            <input type="text" name="city" class="form-control" value="<%= donor ? donor.get('city') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">State</label>
+        <div class="col-sm-10">
+            <input type="text" name="state" class="form-control" value="<%= donor ? donor.get('state') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Zip</label>
+        <div class="col-sm-10">
+            <input type="text" name="zip" class="form-control" value="<%= donor ? donor.get('zip') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Save</button>
+            <% if (donor) { %>
+                <input type="hidden" name="id" value="<%= donor.id %>" />
+                <button id="donor-delete-button" type="button" class="btn btn-danger">Delete</button>
+            <% } %>
+        </div>
+    </div>
+  </form>
+  </script>
+
+<!-- Backbone -->
+
+  <script type="text/javascript">
+    $.fn.serializeObject = function() {
+      var o = {};
+      var a = this.serializeArray();
+      $.each(a, function() {
+          if (o[this.name] !== undefined) {
+              if (!o[this.name].push) {
+                  o[this.name] = [o[this.name]];
+              }
+              o[this.name].push(this.value || '');
+          } else {
+              o[this.name] = this.value || '';
+          }
+      });
+      return o;
+    };
+
+  $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    options.url = 'http://rt-node-tests.herokuapp.com' + options.url;
+  });
+
+  var HomeView = Backbone.View.extend({
+    el: '.page',
+    render: function (options) {
+        $(".page").html("<div><h2>This is the home page</h2></div>");
+    }
+  });
+
+  var homeView = new HomeView();
+
+    var Students = Backbone.Collection.extend({
+        url: '/students',
+    });
+
+    var Student = Backbone.Model.extend({
+        urlRoot: '/students'
+    });
+
+    var StudentListView = Backbone.View.extend({
+        el: '.page',
+        render: function (options) {
+            var that = this;
+            var students = new Students();
+            students.fetch({
+                success: function(students) {
+                    var template = _.template($("#student-list-template").html(), {students: students.models});
+                    that.$el.html(template);
+                },
+                error: function(students, response, options) {
+                    console.log(students);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+        }
+    });
+
+    var studentListView = new StudentListView();
+
+    var Donors = Backbone.Collection.extend({
+        url: '/donors',
+    });
+
+    var Donor = Backbone.Model.extend({
+        urlRoot: '/donors'
+    });
+
+    var DonorListView = Backbone.View.extend({
+        el: '.page',
+        render: function (options) {
+            var that = this;
+            var donors = new Donors();
+            donors.fetch({
+                success: function(donors) {
+                    var template = _.template($("#donor-list-template").html(), {donors: donors.models});
+                    that.$el.html(template);
+                },
+                error: function(donors, response, options) {
+                    console.log(donors);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+        }
+    });
+
+    var donorListView = new DonorListView();
+
+    var StudentEditView = Backbone.View.extend({
+        el: '.page',
+        events: {
+            "submit #edit-student-form": "saveStudent",
+            "click #student-delete-button": "deleteStudent"
+        },
+        saveStudent: function (ev) {
+            var studentDetails = $(ev.currentTarget).serializeObject();
+            var student = new Student();
+            student.save(studentDetails, {
+                success: function(student) {
+                    //alert('You saved the student');
+                    router.navigate('students', {trigger:true});
+                },
+                error: function(student, response, options) {
+                    alert('The student could not be saved.  Please see the console log');
+                    console.log(student);
+                    console.log(response);
+                    console.log(options);
+                    router.navigate('students', {trigger:true});
+
+                }
+            });
+            return false;
+        },
+        deleteStudent: function(ev) {
+            this.student.destroy({
+                success: function (student, response) {
+                    router.navigate('students', {trigger: true});
+            }});
+        },
+        render: function (options) {
+            var that = this;
+            if (options.id) {
+                that.student = new Student({id: options.id});
+                that.student.fetch({
+                    success: function(student) {
+                        var template = _.template($('#student-edit-template').html(), {student: student});
+                        that.$el.html(template);
+                    }
+                });
+            } else {
+                var template = _.template($('#student-edit-template').html(), {student: null});
+                that.$el.html(template);
+            }
+        }
+    });
+
+    var studentEditView = new StudentEditView();
+
+    var DonorEditView = Backbone.View.extend({
+        el: '.page',
+        events: {
+            "submit #edit-donor-form": "saveDonor",
+            "click #donor-delete-button": "deleteDonor"
+        },
+        saveDonor: function (ev) {
+            var donorDetails = $(ev.currentTarget).serializeObject();
+            var donor = new Donor();
+            donor.save(donorDetails, {
+                success: function(donor) {
+                    //alert('You saved the donor');
+                    router.navigate('donors', {trigger:true});
+                },
+                error: function(donor, response, options) {
+                    alert('The donor could not be saved.  Please see the console log');
+                    console.log(donor);
+                    console.log(response);
+                    console.log(options);
+                    router.navigate('donors', {trigger:true});
+
+                }
+            });
+            return false;
+        },
+        deleteDonor: function(ev) {
+            this.donor.destroy({
+                success: function (donor, response) {
+                    router.navigate('donors', {trigger: true});
+            }});
+        },
+        render: function (options) {
+            var that = this;
+            if (options.id) {
+                that.donor = new Donor({id: options.id});
+                that.donor.fetch({
+                    success: function(donor) {
+                        var template = _.template($('#donor-edit-template').html(), {donor: donor});
+                        that.$el.html(template);
+                    }
+                });
+            } else {
+                var template = _.template($('#donor-edit-template').html(), {donor: null});
+                that.$el.html(template);
+            }
+        }
+    });
+
+    var donorEditView = new DonorEditView();
+
+    var Router = Backbone.Router.extend({
+        routes: {
+            "": "home",
+            "students": "listStudents",
+            "donors": "listDonors",
+            "students/new": "newStudent",
+            "students/edit/:id": "editStudent",
+            "donors/new": "newDonor",
+            "donors/edit/:id": "editDonor"
+        }
+    });
+
+    var router = new Router();
+    router.on('route:home', function() {
+        toggleNav("home-tab");
+        homeView.render();
+    });
+    router.on('route:listStudents', function() {
+        toggleNav("students-tab");
+        studentListView.render();
+    });
+    router.on('route:listDonors', function() {
+        toggleNav("donors-tab");
+        donorListView.render();
+    });
+    router.on('route:newStudent', function(id) {
+        toggleNav("students-tab");
+        studentEditView.render({id: id});
+    });
+    router.on('route:editStudent', function(id) {
+        studentEditView.render({id: id});
+    });
+    router.on('route:newDonor', function(id) {
+        toggleNav("donors-tab");
+        donorEditView.render({id: id});
+    });
+    router.on('route:editDonor', function(id) {
+        donorEditView.render({id: id});
+    });
+
+
+    function toggleNav(tabId) {
+        $(".active").removeClass("active");
+        $("#" + tabId).addClass("active");
+    };
+
+    Backbone.history.start();
+
+  </script>
+
+</body>
+</html>
