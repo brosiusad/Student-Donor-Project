@@ -15,6 +15,7 @@
             <li id="home-tab" class="active"><a href="#">Home</a></li>
             <li id="students-tab"><a href="#/students">Students</a></li>
             <li id="donors-tab"><a href="#/donors">Donors</a></li>
+            <li id="trips-tab"><a href="#/trips">Trips</a></li>
         </ul>
         </div>
         <div class="col-offset-md-6" style="text-align: right">
@@ -76,6 +77,29 @@
         <td><%- donor.get('state') %></td>
         <td><%- donor.get('zip') %></td>
         <td><a href="#/donors/edit/<%= donor.id %>" class="btn btn-default btn-xs">Edit</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </script>
+
+  <script type="text/template" id="trip-list-template">
+  <div style="float: right">
+    <a href="#/trips/new" class="btn btn-success">New Trip</a>
+  </div>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Name</th><th>Start Date</th><th>End Date</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(trips, function(trip) { %>
+      <tr>
+        <td><%- trip.get('name') %></td>
+        <td><%- trip.get('start_date') %></td>
+        <td><%- trip.get('end_date') %></td>
+        <td><a href="#/trips/edit/<%= trip.id %>" class="btn btn-default btn-xs">Edit</a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -193,6 +217,42 @@
         </div>
     </div>
   </form>
+  </script>
+
+  <script type="text/template" id="trip-edit-template">
+  <form id="edit-trip-form" class="form-horizontal" role="form">
+    <div class="col-sm-offset-2 col-sm-10">
+        <legend><%= trip ? 'Edit' : 'Create' %> Donor</legend>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+            <input type="text" name="name" class="form-control" value="<%= trip ? trip.get('name') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Start Date</label>
+        <div class="col-sm-10">
+            <input type="text" name="start_date" class="form-control" value="<%= trip ? trip.get('start_date') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">End Date</label>
+        <div class="col-sm-10">
+            <input type="text" name="end_date" class="form-control" value="<%= trip ? trip.get('end_date') : '' %>" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Save</button>
+            <% if (trip) { %>
+                <input type="hidden" name="id" value="<%= trip.id %>" />
+                <button id="trip-delete-button" type="button" class="btn btn-danger">Delete</button>
+            <% } %>
+        </div>
+    </div>
+  </form>
+
   </script>
 
 <!-- Backbone -->
@@ -386,15 +446,99 @@
 
     var donorEditView = new DonorEditView();
 
+<!-- Trips -->
+
+    var Trips = Backbone.Collection.extend({
+        url: '/trips',
+    });
+
+    var Trip = Backbone.Model.extend({
+        urlRoot: '/trips'
+    });
+
+    var TripListView = Backbone.View.extend({
+        el: '.page',
+        render: function (options) {
+            var that = this;
+            var trips = new Trips();
+            trips.fetch({
+                success: function(trips) {
+                    var template = _.template($("#trip-list-template").html(), {trips: trips.models});
+                    that.$el.html(template);
+                },
+                error: function(trips, response, options) {
+                    console.log(trips);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+        }
+    });
+
+    var tripListView = new TripListView();
+
+    var TripEditView = Backbone.View.extend({
+        el: '.page',
+        events: {
+            "submit #edit-trip-form": "saveTrip",
+            "click #trip-delete-button": "deleteTrip"
+        },
+        saveTrip: function (ev) {
+            var tripDetails = $(ev.currentTarget).serializeObject();
+            var trip = new Trip();
+            trip.save(tripDetails, {
+                success: function(trip) {
+                    //alert('You saved the trip');
+                    router.navigate('trips', {trigger:true});
+                },
+                error: function(trip, response, options) {
+                    alert('The trip could not be saved.  Please see the console log');
+                    console.log(trip);
+                    console.log(response);
+                    console.log(options);
+                    router.navigate('trips', {trigger:true});
+
+                }
+            });
+            return false;
+        },
+        deleteTrip: function(ev) {
+            this.trip.destroy({
+                success: function (trip, response) {
+                    router.navigate('trips', {trigger: true});
+            }});
+        },
+        render: function (options) {
+            var that = this;
+            if (options.id) {
+                that.trip = new Trip({id: options.id});
+                that.trip.fetch({
+                    success: function(trip) {
+                        var template = _.template($('#trip-edit-template').html(), {trip: trip});
+                        that.$el.html(template);
+                    }
+                });
+            } else {
+                var template = _.template($('#trip-edit-template').html(), {trip: null});
+                that.$el.html(template);
+            }
+        }
+    });
+
+    var tripEditView = new TripEditView();
+
     var Router = Backbone.Router.extend({
         routes: {
             "": "home",
             "students": "listStudents",
-            "donors": "listDonors",
             "students/new": "newStudent",
             "students/edit/:id": "editStudent",
+            "donors": "listDonors",
             "donors/new": "newDonor",
-            "donors/edit/:id": "editDonor"
+            "donors/edit/:id": "editDonor",
+            "trips": "listTrips",
+            "trips/new": "newTrip",
+            "trips/edit/:id": "editTrip"
         }
     });
 
@@ -407,10 +551,6 @@
         toggleNav("students-tab");
         studentListView.render();
     });
-    router.on('route:listDonors', function() {
-        toggleNav("donors-tab");
-        donorListView.render();
-    });
     router.on('route:newStudent', function(id) {
         toggleNav("students-tab");
         studentEditView.render({id: id});
@@ -418,12 +558,27 @@
     router.on('route:editStudent', function(id) {
         studentEditView.render({id: id});
     });
+    router.on('route:listDonors', function() {
+        toggleNav("donors-tab");
+        donorListView.render();
+    });
     router.on('route:newDonor', function(id) {
         toggleNav("donors-tab");
         donorEditView.render({id: id});
     });
     router.on('route:editDonor', function(id) {
         donorEditView.render({id: id});
+    });
+    router.on('route:listTrips', function() {
+        toggleNav("trips-tab");
+        tripListView.render();
+    });
+    router.on('route:newTrip', function(id) {
+        toggleNav("trips-tab");
+        tripEditView.render({id: id});
+    });
+    router.on('route:editTrip', function(id) {
+        tripEditView.render({id: id});
     });
 
 
