@@ -50,60 +50,43 @@
         <td><%- student.get('city') %></td>
         <td><%- student.get('state') %></td>
         <td><%- student.get('zip') %></td>
-        <td><a href="#/students/edit/<%= student.id %>" class="btn btn-default btn-xs">Edit</a></td>
+        <td><a href="#/students/<%= student.id %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
   </tbody>
   </table>
   </script>
 
-  <script type="text/template" id="donor-list-template">
-    <div style="float: right">
-    <a href="#/donors/new" class="btn btn-success">New Donor</a>
+  <script type="text/template" id="student-detail-template">
+  <div>
+    <div style="border-bottom: 1px solid grey">
+    <h3><%= student ? student.get('firstname') : ''%><%= ' ' + student.get('lastname') %></h3>
     </div>
-    <table class="table table-striped">
-  <thead>
-    <tr>
-        <th>First Name</th><th>Last Name</th><th>Street</th><th>City</th><th>State</th><th>Zip</th><th></th>
-    </tr>
-  </thead>
-  <tbody>
-      <% _.each(donors, function(donor) { %>
-      <tr>
-        <td><%- donor.get('firstname') %></td>
-        <td><%- donor.get('lastname') %></td>
-        <td><%- donor.get('street') %></td>
-        <td><%- donor.get('city') %></td>
-        <td><%- donor.get('state') %></td>
-        <td><%- donor.get('zip') %></td>
-        <td><a href="#/donors/edit/<%= donor.id %>" class="btn btn-default btn-xs">Edit</a></td>
-      </tr>
-        <% }); %>
-  </tbody>
-  </table>
-  </script>
-
-  <script type="text/template" id="trip-list-template">
-  <div style="float: right">
-    <a href="#/trips/new" class="btn btn-success">New Trip</a>
-  </div>
-  <table class="table table-striped">
-  <thead>
-    <tr>
-        <th>Name</th><th>Start Date</th><th>End Date</th><th></th>
-    </tr>
-  </thead>
-  <tbody>
-      <% _.each(trips, function(trip) { %>
-      <tr>
-        <td><%- trip.get('name') %></td>
-        <td><%- trip.get('start_date') %></td>
-        <td><%- trip.get('end_date') %></td>
-        <td><a href="#/trips/edit/<%= trip.id %>" class="btn btn-default btn-xs">Edit</a></td>
-      </tr>
-        <% }); %>
-  </tbody>
-  </table>
+    <div class="row" style="margin-top: 8px">
+      <label class="col-md-2 text-right">First Name</label>
+        <div class="col-md-4"><%= student ? student.get('firstname') : '' %> </div>
+        <label class="col-md-2 text-right">Street</label>
+        <div class="col-md-4"><%= student ? student.get('street') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <label class="col-md-2 text-right">Last Name</label>
+        <div class="col-md-4"><%= student ? student.get('lastname') : '' %> </div>
+        <label class="col-md-2 text-right">City</label>
+        <div class="col-md-4"><%= student ? student.get('city') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <label class="col-md-2 text-right">Age</label>
+        <div class="col-md-4"><%= student ? student.get('age') : '' %> </div>
+        <label class="col-md-2 text-right">State</label>
+        <div class="col-md-4"><%= student ? student.get('state') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <div class="col-md-6" />
+        <label class="col-md-2 text-right">Zip</label>
+        <div class="col-md-4"><%= student ? student.get('zip') : '' %> </div>
+    </div>
+    </div>
+    <div id="trip-tripattendances-list" />
   </script>
 
   <script type="text/template" id="student-edit-template">
@@ -165,8 +148,63 @@
   </form>
   </script>
 
+  <script type="text/template" id="donor-list-template">
+    <div style="float: right">
+    <a href="#/donors/new" class="btn btn-success">New Donor</a>
+    </div>
+    <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>First Name</th><th>Last Name</th><th>Street</th><th>City</th><th>State</th><th>Zip</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(donors, function(donor) { %>
+      <tr>
+        <td><%- donor.get('firstname') %></td>
+        <td><%- donor.get('lastname') %></td>
+        <td><%- donor.get('street') %></td>
+        <td><%- donor.get('city') %></td>
+        <td><%- donor.get('state') %></td>
+        <td><%- donor.get('zip') %></td>
+        <td><a href="#/donors/<%= donor.id %>" class="btn btn-default btn-xs">Details</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </script>
 
-  <script type="text/template" id="donor-edit-template">
+  <script type="text/template" id="donor-detail-template">
+  <div>
+  <div style="border-bottom: 1px solid grey">
+    <h3><%= donor ? donor.get('firstname') : ''%><%= ' ' + donor.get('lastname') %></h3>
+    </div>
+    <div class="row" style="margin-top: 8px">
+      <label class="col-md-2 text-right">First Name</label>
+        <div class="col-md-4"><%= donor ? donor.get('firstname') : '' %> </div>
+        <label class="col-md-2 text-right">Street</label>
+        <div class="col-md-4"><%= donor ? donor.get('street') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <label class="col-md-2 text-right">Last Name</label>
+        <div class="col-md-4"><%= donor ? donor.get('lastname') : '' %> </div>
+        <label class="col-md-2 text-right">City</label>
+        <div class="col-md-4"><%= donor ? donor.get('city') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <div class="col-md-6" />
+        <label class="col-md-2 text-right">State</label>
+        <div class="col-md-4"><%= donor ? donor.get('state') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <div class="col-md-6" />
+        <label class="col-md-2 text-right">Zip</label>
+        <div class="col-md-4"><%= donor ? donor.get('zip') : '' %> </div>
+    </div>
+    </div>
+  </script>
+
+ <script type="text/template" id="donor-edit-template">
   <form id="edit-donor-form" class="form-horizontal" role="form">
     <div class="col-sm-offset-2 col-sm-10">
         <legend><%= donor ? 'Edit' : 'Create' %> Donor</legend>
@@ -219,10 +257,54 @@
   </form>
   </script>
 
+  <script type="text/template" id="trip-list-template">
+  <div style="float: right">
+    <a href="#/trips/new" class="btn btn-success">New Trip</a>
+  </div>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Name</th><th>Start Date</th><th>End Date</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(trips, function(trip) { %>
+      <tr>
+        <td><%- trip.get('name') %></td>
+        <td><%- trip.get('start_date') %></td>
+        <td><%- trip.get('end_date') %></td>
+        <td><a href="#/trips/<%= trip.id %>" class="btn btn-default btn-xs">Details</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </script>
+
+  <script type="text/template" id="trip-detail-template">
+  <div>
+  <div style="border-bottom: 1px solid grey">
+    <h3><%= trip.get('name') %></h3>
+    </div>
+    <div class="row" style="margin-top: 8px">
+      <label class="col-md-2 text-right">Name</label>
+        <div class="col-md-4"><%= trip ? trip.get('name') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <label class="col-md-2 text-right">Start Date</label>
+        <div class="col-md-4"><%= trip ? trip.get('start_date') : '' %> </div>
+    </div>
+    <div class="row" style="margin-top: 8px">
+        <label class="col-md-2 text-right">End Date</label>
+        <div class="col-md-4"><%= trip ? trip.get('end_date') : '' %> </div>
+    </div>
+    </div>
+    <div id="student-tripattendances-list" />
+  </script>
+
   <script type="text/template" id="trip-edit-template">
   <form id="edit-trip-form" class="form-horizontal" role="form">
     <div class="col-sm-offset-2 col-sm-10">
-        <legend><%= trip ? 'Edit' : 'Create' %> Donor</legend>
+        <legend><%= trip ? 'Edit' : 'Create' %> Trip</legend>
     </div>
     <div class="form-group">
         <label class="col-sm-2 control-label">Name</label>
@@ -252,7 +334,55 @@
         </div>
     </div>
   </form>
+  </script>
 
+  <script type="text/template" id="trip-tripattendances-list-template">
+  <div style="margin-top: 36px">
+  <h4>Trips</h4>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Name</th><th>Start Date</th><th>End Date</th><th>Total Raised</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(tripattendances, function(tripattendance) { %>
+      <tr data-trip-id="<%- tripattendance.get('trip_id') %>">
+        <td><%- tripattendance.get('name') %></td>
+        <td><%- tripattendance.get('start_date') %></td>
+        <td><%- tripattendance.get('end_date') %></td>
+        <td>$<%- tripattendance.get('total') %></td>
+        <td><a href="#/trips/<%= tripattendance.get('trip_id') %>" class="btn btn-default btn-xs">Details</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </div>
+  </script>
+
+  <script type="text/template" id="student-tripattendances-list-template">
+  <div style="margin-top: 36px">
+  <h4>Sponsored Students</h4>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>First Name</th><th>Last Name</th><th>City</th><th>State</th><th>Total Raised</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(tripattendances, function(tripattendance) { %>
+      <tr data-trip-id="<%- tripattendance.get('student_id') %>">
+        <td><%- tripattendance.get('firstname') %></td>
+        <td><%- tripattendance.get('lastname') %></td>
+        <td><%- tripattendance.get('city') %></td>
+        <td><%- tripattendance.get('state') %></td>
+        <td>$<%- tripattendance.get('total') %></td>
+        <td><a href="#/students/<%= tripattendance.get('student_id') %>" class="btn btn-default btn-xs">Details</a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+  </div>
   </script>
 
 <!-- Backbone -->
@@ -275,8 +405,8 @@
     };
 
   $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-    //options.url = 'http://localhost:5000' + options.url;
-    options.url = 'http://student-donor-service.herokuapp.com' + options.url;
+    options.url = 'http://localhost:5000' + options.url;
+    //options.url = 'http://student-donor-service.herokuapp.com' + options.url;
   });
 
   var HomeView = Backbone.View.extend({
@@ -287,6 +417,8 @@
   });
 
   var homeView = new HomeView();
+
+<!-- Students -->
 
     var Students = Backbone.Collection.extend({
         url: '/students',
@@ -317,34 +449,39 @@
 
     var studentListView = new StudentListView();
 
-    var Donors = Backbone.Collection.extend({
-        url: '/donors',
-    });
-
-    var Donor = Backbone.Model.extend({
-        urlRoot: '/donors'
-    });
-
-    var DonorListView = Backbone.View.extend({
+    var StudentDetailView = Backbone.View.extend({
         el: '.page',
-        render: function (options) {
+        render: function(options) {
             var that = this;
-            var donors = new Donors();
-            donors.fetch({
-                success: function(donors) {
-                    var template = _.template($("#donor-list-template").html(), {donors: donors.models});
+
+            that.student = new Student({id: options.id});
+            that.student.fetch({
+                success: function(student) {
+                    var template = _.template($('#student-detail-template').html(), {student: student});
                     that.$el.html(template);
-                },
-                error: function(donors, response, options) {
-                    console.log(donors);
-                    console.log(response);
-                    console.log(options);
+                    fetchTripAttendance();
                 }
             });
+
+            var fetchTripAttendance = function() {
+                var tripattendances = new TripAttendances();
+                tripattendances.fetch({
+                    data: {studentId: that.student.id},
+                    success: function(tripattendances) {
+                        var template = _.template($('#trip-tripattendances-list-template').html(), {tripattendances: tripattendances.models});
+                        that.$el.find("#trip-tripattendances-list").html(template);
+                    },
+                    error: function(tripattendances, response, options) {
+                        console.log(tripattendances);
+                        console.log(response);
+                        console.log(options);
+                    }
+                });
+            }
         }
     });
 
-    var donorListView = new DonorListView();
+    var studentDetailView = new StudentDetailView();
 
     var StudentEditView = Backbone.View.extend({
         el: '.page',
@@ -395,6 +532,54 @@
     });
 
     var studentEditView = new StudentEditView();
+
+<!-- Donors -->
+
+    var Donors = Backbone.Collection.extend({
+        url: '/donors',
+    });
+
+    var Donor = Backbone.Model.extend({
+        urlRoot: '/donors'
+    });
+
+    var DonorListView = Backbone.View.extend({
+        el: '.page',
+        render: function (options) {
+            var that = this;
+            var donors = new Donors();
+            donors.fetch({
+                success: function(donors) {
+                    var template = _.template($("#donor-list-template").html(), {donors: donors.models});
+                    that.$el.html(template);
+                },
+                error: function(donors, response, options) {
+                    console.log(donors);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+        }
+    });
+
+    var donorListView = new DonorListView();
+
+    var DonorDetailView = Backbone.View.extend({
+        el: '.page',
+        render: function(options) {
+            var that = this;
+
+            that.donor = new Donor({id: options.id});
+            that.donor.fetch({
+                success: function(donor) {
+                    var template = _.template($('#donor-detail-template').html(), {donor: donor});
+                    that.$el.html(template);
+                }
+            });
+        }
+    });
+
+    var donorDetailView = new DonorDetailView();
 
     var DonorEditView = Backbone.View.extend({
         el: '.page',
@@ -477,6 +662,40 @@
 
     var tripListView = new TripListView();
 
+    var TripDetailView = Backbone.View.extend({
+        el: '.page',
+        render: function(options) {
+            var that = this;
+
+            that.trip = new Trip({id: options.id});
+            that.trip.fetch({
+                success: function(trip) {
+                    var template = _.template($('#trip-detail-template').html(), {trip: trip});
+                    that.$el.html(template);
+                    fetchTripAttendance();
+                }
+            });
+
+            var fetchTripAttendance = function() {
+                var tripattendances = new TripAttendances();
+                tripattendances.fetch({
+                    data: {tripId: that.trip.id},
+                    success: function(tripattendances) {
+                        var template = _.template($('#student-tripattendances-list-template').html(), {tripattendances: tripattendances.models});
+                        that.$el.find('#student-tripattendances-list').html(template);
+                    },
+                    error: function(tripattendances, response, options) {
+                        console.log(tripattendances);
+                        console.log(response);
+                        console.log(options);
+                    }
+                });
+            }
+        }
+    });
+
+    var tripDetailView = new TripDetailView();
+
     var TripEditView = Backbone.View.extend({
         el: '.page',
         events: {
@@ -527,16 +746,37 @@
 
     var tripEditView = new TripEditView();
 
+<!-- Trip Attendance -->
+
+    var TripAttendance = Backbone.Model.extend({
+        urlRoot: '/tripattendances'
+    });
+
+    var TripAttendance = new TripAttendance();
+
+    var TripAttendances = Backbone.Collection.extend({
+        url: '/tripattendances'
+    });
+
+    var TripAttendanceListView = Backbone.View.extend({
+        el: '#tripattendance-list'
+    });
+
+<!-- Router -->
+
     var Router = Backbone.Router.extend({
         routes: {
             "": "home",
             "students": "listStudents",
+            "students/:id": "viewStudent",
             "students/new": "newStudent",
             "students/edit/:id": "editStudent",
             "donors": "listDonors",
+            "donors/:id": "viewDonor",
             "donors/new": "newDonor",
             "donors/edit/:id": "editDonor",
             "trips": "listTrips",
+            "trips/:id": "viewTrip",
             "trips/new": "newTrip",
             "trips/edit/:id": "editTrip"
         }
@@ -551,33 +791,48 @@
         toggleNav("students-tab");
         studentListView.render();
     });
+    router.on('route:viewStudent', function(id) {
+        toggleNav("students-tab");
+        studentDetailView.render({id: id});
+    });
     router.on('route:newStudent', function(id) {
         toggleNav("students-tab");
         studentEditView.render({id: id});
     });
     router.on('route:editStudent', function(id) {
+        toggleNav("students-tab");
         studentEditView.render({id: id});
     });
     router.on('route:listDonors', function() {
         toggleNav("donors-tab");
         donorListView.render();
     });
+    router.on('route:viewDonor', function(id) {
+        toggleNav("donors-tab");
+        donorDetailView.render({id: id});
+    });
     router.on('route:newDonor', function(id) {
         toggleNav("donors-tab");
         donorEditView.render({id: id});
     });
     router.on('route:editDonor', function(id) {
+        toggleNav("donors-tab");
         donorEditView.render({id: id});
     });
     router.on('route:listTrips', function() {
         toggleNav("trips-tab");
         tripListView.render();
     });
+    router.on('route:viewTrip', function(id) {
+        toggleNav("trips-tab");
+        tripDetailView.render({id: id});
+    });
     router.on('route:newTrip', function(id) {
         toggleNav("trips-tab");
         tripEditView.render({id: id});
     });
     router.on('route:editTrip', function(id) {
+        toggleNav("trips-tab");
         tripEditView.render({id: id});
     });
 
