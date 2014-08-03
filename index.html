@@ -86,7 +86,7 @@
         <div class="col-md-4"><%= student ? student.get('zip') : '' %> </div>
     </div>
     </div>
-    <div id="trip-tripattendances-list" />
+    <div id="student-subpanel" />
   </script>
 
   <script type="text/template" id="student-edit-template">
@@ -348,11 +348,11 @@
   <tbody>
       <% _.each(tripattendances, function(tripattendance) { %>
       <tr data-trip-id="<%- tripattendance.get('trip_id') %>">
-        <td><%- tripattendance.get('name') %></td>
+        <td><a href="#/trips/<%= tripattendance.get('trip_id') %>"><%- tripattendance.get('name') %></a></td>
         <td><%- tripattendance.get('start_date') %></td>
         <td><%- tripattendance.get('end_date') %></td>
         <td>$<%- tripattendance.get('total') %></td>
-        <td><a href="#/trips/<%= tripattendance.get('trip_id') %>" class="btn btn-default btn-xs">Details</a></td>
+        <td><a href="#/students/<%= tripattendance.get('student_id') %>/trips/<%= tripattendance.get('trip_id') %>" class="btn btn-default btn-xs">Donations</a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -380,6 +380,35 @@
         <td><a href="#/students/<%= tripattendance.get('student_id') %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
+  </tbody>
+  </table>
+  </div>
+  </script>
+
+  <script type="text/template" id="student-donations-list-template">
+  <%= console.log(donations[0]) %>
+  <div style="margin-top: 36px">
+    <h4>
+        <ol class="breadcrumb">
+            <li><a href="/students/<%- donations[0].get('student_id') %>">Trips</a></li>
+            <li class="active"><%- donations[0].get('trip_name') %> (<%- donations[0].get('start_date') %> - <%- donations[0].get('end_date') %>)</li>
+        </ol>
+    </h4>
+    <h5>Donations</h5>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>First Name</th><th>Last Name</th><th>Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(donations, function(donation) { %>
+      <tr>
+        <td><%- donation.get('donor_firstname') %></td>
+        <td><%- donation.get('donor_lastname') %></td>
+        <td><%- donation.get('amount') %></td>
+      </tr>
+      <% }); %>
   </tbody>
   </table>
   </div>
@@ -459,7 +488,13 @@
                 success: function(student) {
                     var template = _.template($('#student-detail-template').html(), {student: student});
                     that.$el.html(template);
-                    fetchTripAttendance();
+
+                    // conditionally render subpanel
+                    if (options.tripId) {
+                        fetchDonations();
+                    } else {
+                        fetchTripAttendance();
+                    }
                 }
             });
 
@@ -469,10 +504,26 @@
                     data: {studentId: that.student.id},
                     success: function(tripattendances) {
                         var template = _.template($('#trip-tripattendances-list-template').html(), {tripattendances: tripattendances.models});
-                        that.$el.find("#trip-tripattendances-list").html(template);
+                        that.$el.find("#student-subpanel").html(template);
                     },
                     error: function(tripattendances, response, options) {
                         console.log(tripattendances);
+                        console.log(response);
+                        console.log(options);
+                    }
+                });
+            }
+
+            var fetchDonations = function() {
+                var donations = new Donations();
+                donations.fetch({
+                    data: {studentId: that.student.id, tripId: options.tripId},
+                    success: function(donations) {
+                        var template = _.template($('#student-donations-list-template').html(), {donations: donations.models});
+                        that.$el.find("#student-subpanel").html(template);
+                    },
+                    error: function(donations, response, options) {
+                        console.log(donations);
                         console.log(response);
                         console.log(options);
                     }
@@ -752,14 +803,23 @@
         urlRoot: '/tripattendances'
     });
 
-    var TripAttendance = new TripAttendance();
-
     var TripAttendances = Backbone.Collection.extend({
         url: '/tripattendances'
     });
 
     var TripAttendanceListView = Backbone.View.extend({
-        el: '#tripattendance-list'
+    });
+
+<!-- Donations -->
+    var Donation = Backbone.Model.extend({
+        urlRoot: '/donations'
+    });
+
+    var Donations = Backbone.Collection.extend({
+        url: '/donations'
+    });
+
+    var donationListView = Backbone.View.extend({
     });
 
 <!-- Router -->
@@ -769,6 +829,7 @@
             "": "home",
             "students": "listStudents",
             "students/:id": "viewStudent",
+            "students/:id/trips/:tripId": "viewDonationsForStudentTrip",
             "students/new": "newStudent",
             "students/edit/:id": "editStudent",
             "donors": "listDonors",
@@ -794,6 +855,10 @@
     router.on('route:viewStudent', function(id) {
         toggleNav("students-tab");
         studentDetailView.render({id: id});
+    });
+    router.on('route:viewDonationsForStudentTrip', function(id, tripId) {
+        toggleNav("students-tab");
+        studentDetailView.render({id: id, tripId: tripId});
     });
     router.on('route:newStudent', function(id) {
         toggleNav("students-tab");
