@@ -5,7 +5,8 @@
   <title>Student Donation Manager</title>
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
   <style type="text/css">
-  .edit-button {
+  .btn-float-right {
+    float: right;
     position: relative;
     top: -10px;
   }
@@ -35,26 +36,27 @@
 <!-- Templates -->
 
   <script type="text/template" id="student-list-template">
-  <div style="float: right">
-    <a href="#/newStudent" class="btn btn-success">New Student</a>
+  <div style="border-bottom: 1px solid grey">
+      <div class="btn-float-right">
+        <a href="#/newStudent" class="btn btn-success">New Student</a>
+      </div>
+    <h3>Students</h3>
   </div>
   <table class="table table-striped">
   <thead>
     <tr>
-        <th>First Name</th><th>Last Name</th><th>Age</th><th>Street</th><th>City</th><th>State</th><th>Zip</th><th></th>
+        <th>Name</th><th>Age</th><th>Street</th><th>City</th><th>State</th><th>Zip</th>
     </tr>
   </thead>
   <tbody>
       <% _.each(students, function(student) { %>
       <tr>
-        <td><%- student.get('firstname') %></td>
-        <td><%- student.get('lastname') %></td>
+        <td><a href="#/students/<%= student.id %>"><%- student.get('firstname') %> <%- student.get('lastname') %></a></td>
         <td><%- student.get('age') %></td>
         <td><%- student.get('street') %></td>
         <td><%- student.get('city') %></td>
         <td><%- student.get('state') %></td>
         <td><%- student.get('zip') %></td>
-        <td><a href="#/students/<%= student.id %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -64,8 +66,8 @@
   <script type="text/template" id="student-detail-template">
   <div>
     <div style="border-bottom: 1px solid grey">
-      <div style="float: right">
-        <a href="#/students/edit/<%= student.get('id') %>" class="btn btn-default edit-button">Edit Student</a>
+      <div class="btn-float-right">
+        <a href="#/students/edit/<%= student.get('id') %>" class="btn btn-default">Edit Student</a>
       </div>
     <h3><%= student ? student.get('firstname') : ''%><%= ' ' + student.get('lastname') %></h3>
     </div>
@@ -156,25 +158,26 @@
   </script>
 
   <script type="text/template" id="donor-list-template">
-    <div style="float: right">
-    <a href="#/newDonor" class="btn btn-success">New Donor</a>
-    </div>
+  <div style="border-bottom: 1px solid grey">
+      <div class="btn-float-right">
+        <a href="#/newDonor" class="btn btn-success">New Donor</a>
+      </div>
+    <h3>Donors</h3>
+  </div>
     <table class="table table-striped">
   <thead>
     <tr>
-        <th>First Name</th><th>Last Name</th><th>Street</th><th>City</th><th>State</th><th>Zip</th><th></th>
+        <th>Name</th><th>Street</th><th>City</th><th>State</th><th>Zip</th>
     </tr>
   </thead>
   <tbody>
       <% _.each(donors, function(donor) { %>
       <tr>
-        <td><%- donor.get('firstname') %></td>
-        <td><%- donor.get('lastname') %></td>
+        <td><a href="#/donors/<%= donor.id %>"><%- donor.get('firstname') %> <%- donor.get('lastname') %></td>
         <td><%- donor.get('street') %></td>
         <td><%- donor.get('city') %></td>
         <td><%- donor.get('state') %></td>
         <td><%- donor.get('zip') %></td>
-        <td><a href="#/donors/<%= donor.id %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -184,8 +187,8 @@
   <script type="text/template" id="donor-detail-template">
   <div>
   <div style="border-bottom: 1px solid grey">
-      <div style="float: right">
-        <a href="#/donors/edit/<%= donor.get('id') %>" class="btn btn-default edit-button">Edit Donor</a>
+      <div class="btn-float-right">
+        <a href="#/donors/edit/<%= donor.get('id') %>" class="btn btn-default">Edit Donor</a>
       </div>
     <h3><%= donor ? donor.get('firstname') : ''%><%= ' ' + donor.get('lastname') %></h3>
     </div>
@@ -268,8 +271,11 @@
   </script>
 
   <script type="text/template" id="trip-list-template">
-  <div style="float: right">
-    <a href="#/newTrip" class="btn btn-success">New Trip</a>
+  <div style="border-bottom: 1px solid grey">
+      <div class="btn-float-right">
+        <a href="#/newTrip" class="btn btn-success">New Trip</a>
+      </div>
+    <h3>Trips</h3>
   </div>
   <table class="table table-striped">
   <thead>
@@ -293,8 +299,8 @@
   <script type="text/template" id="trip-detail-template">
   <div>
   <div style="border-bottom: 1px solid grey">
-      <div style="float: right">
-        <a href="#/trips/edit/<%= trip.get('id') %>" class="btn btn-default edit-button">Edit Trip</a>
+      <div class="btn-float-right">
+        <a href="#/trips/edit/<%= trip.get('id') %>" class="btn btn-default">Edit Trip</a>
       </div>
     <h3><%= trip.get('name') %></h3>
     </div>
