@@ -5,6 +5,10 @@
   <title>Student Donation Manager</title>
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
   <style type="text/css">
+  .edit-button {
+    position: relative;
+    top: -10px;
+  }
   </style>
 </head>
 <body>
@@ -32,7 +36,7 @@
 
   <script type="text/template" id="student-list-template">
   <div style="float: right">
-    <a href="#/students/new" class="btn btn-success">New Student</a>
+    <a href="#/newStudent" class="btn btn-success">New Student</a>
   </div>
   <table class="table table-striped">
   <thead>
@@ -60,6 +64,9 @@
   <script type="text/template" id="student-detail-template">
   <div>
     <div style="border-bottom: 1px solid grey">
+      <div style="float: right">
+        <a href="#/students/edit/<%= student.get('id') %>" class="btn btn-default edit-button">Edit Student</a>
+      </div>
     <h3><%= student ? student.get('firstname') : ''%><%= ' ' + student.get('lastname') %></h3>
     </div>
     <div class="row" style="margin-top: 8px">
@@ -150,7 +157,7 @@
 
   <script type="text/template" id="donor-list-template">
     <div style="float: right">
-    <a href="#/donors/new" class="btn btn-success">New Donor</a>
+    <a href="#/newDonor" class="btn btn-success">New Donor</a>
     </div>
     <table class="table table-striped">
   <thead>
@@ -177,6 +184,9 @@
   <script type="text/template" id="donor-detail-template">
   <div>
   <div style="border-bottom: 1px solid grey">
+      <div style="float: right">
+        <a href="#/donors/edit/<%= donor.get('id') %>" class="btn btn-default edit-button">Edit Donor</a>
+      </div>
     <h3><%= donor ? donor.get('firstname') : ''%><%= ' ' + donor.get('lastname') %></h3>
     </div>
     <div class="row" style="margin-top: 8px">
@@ -259,7 +269,7 @@
 
   <script type="text/template" id="trip-list-template">
   <div style="float: right">
-    <a href="#/trips/new" class="btn btn-success">New Trip</a>
+    <a href="#/newTrip" class="btn btn-success">New Trip</a>
   </div>
   <table class="table table-striped">
   <thead>
@@ -283,6 +293,9 @@
   <script type="text/template" id="trip-detail-template">
   <div>
   <div style="border-bottom: 1px solid grey">
+      <div style="float: right">
+        <a href="#/trips/edit/<%= trip.get('id') %>" class="btn btn-default edit-button">Edit Trip</a>
+      </div>
     <h3><%= trip.get('name') %></h3>
     </div>
     <div class="row" style="margin-top: 8px">
@@ -377,7 +390,7 @@
         <td><%- tripattendance.get('city') %></td>
         <td><%- tripattendance.get('state') %></td>
         <td>$<%- tripattendance.get('total') %></td>
-        <td><a href="#/students/<%= tripattendance.get('student_id') %>" class="btn btn-default btn-xs">Details</a></td>
+        <td><a href="/students/<%= tripattendance.get('student_id') %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -390,7 +403,7 @@
   <div style="margin-top: 36px">
     <h4>
         <ol class="breadcrumb">
-            <li><a href="/students/<%- donations[0].get('student_id') %>">Trips</a></li>
+            <li><a href="#/students/<%- donations[0].get('student_id') %>">Trips</a></li>
             <li class="active"><%- donations[0].get('trip_name') %> (<%- donations[0].get('start_date') %> - <%- donations[0].get('end_date') %>)</li>
         </ol>
     </h4>
@@ -830,15 +843,15 @@
             "students": "listStudents",
             "students/:id": "viewStudent",
             "students/:id/trips/:tripId": "viewDonationsForStudentTrip",
-            "students/new": "newStudent",
+            "newStudent": "newStudent",
             "students/edit/:id": "editStudent",
             "donors": "listDonors",
             "donors/:id": "viewDonor",
-            "donors/new": "newDonor",
+            "newDonor": "newDonor",
             "donors/edit/:id": "editDonor",
             "trips": "listTrips",
             "trips/:id": "viewTrip",
-            "trips/new": "newTrip",
+            "newTrip": "newTrip",
             "trips/edit/:id": "editTrip"
         }
     });
