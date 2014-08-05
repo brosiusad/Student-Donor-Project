@@ -280,16 +280,15 @@
   <table class="table table-striped">
   <thead>
     <tr>
-        <th>Name</th><th>Start Date</th><th>End Date</th><th></th>
+        <th>Name</th><th>Start Date</th><th>End Date</th>
     </tr>
   </thead>
   <tbody>
       <% _.each(trips, function(trip) { %>
       <tr>
-        <td><%- trip.get('name') %></td>
+        <td><a href="#/trips/<%= trip.id %>"><%- trip.get('name') %></a></td>
         <td><%- trip.get('start_date') %></td>
         <td><%- trip.get('end_date') %></td>
-        <td><a href="#/trips/<%= trip.id %>" class="btn btn-default btn-xs">Details</a></td>
       </tr>
         <% }); %>
   </tbody>
