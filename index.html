@@ -287,8 +287,8 @@
       <% _.each(trips, function(trip) { %>
       <tr>
         <td><a href="#/trips/<%= trip.id %>"><%- trip.get('name') %></a></td>
-        <td><%- trip.get('start_date') %></td>
-        <td><%- trip.get('end_date') %></td>
+        <td><%- new Date(trip.get('start_date')).toDateString() %></td>
+        <td><%- new Date(trip.get('end_date')).toDateString() %></td>
       </tr>
         <% }); %>
   </tbody>
@@ -309,11 +309,11 @@
     </div>
     <div class="row" style="margin-top: 8px">
         <label class="col-md-2 text-right">Start Date</label>
-        <div class="col-md-4"><%= trip ? trip.get('start_date') : '' %> </div>
+        <div class="col-md-4"><%= trip ? new Date(trip.get('start_date')).toDateString() : '' %> </div>
     </div>
     <div class="row" style="margin-top: 8px">
         <label class="col-md-2 text-right">End Date</label>
-        <div class="col-md-4"><%= trip ? trip.get('end_date') : '' %> </div>
+        <div class="col-md-4"><%= trip ? new Date(trip.get('end_date')).toDateString() : '' %> </div>
     </div>
     </div>
     <div id="student-tripattendances-list" />
@@ -333,13 +333,13 @@
     <div class="form-group">
         <label class="col-sm-2 control-label">Start Date</label>
         <div class="col-sm-10">
-            <input type="text" name="start_date" class="form-control" value="<%= trip ? trip.get('start_date') : '' %>" />
+            <input type="text" name="start_date" class="form-control" value="<%= trip ? new Date(trip.get('start_date')).toDateString() : '' %>" />
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-2 control-label">End Date</label>
         <div class="col-sm-10">
-            <input type="text" name="end_date" class="form-control" value="<%= trip ? trip.get('end_date') : '' %>" />
+            <input type="text" name="end_date" class="form-control" value="<%= trip ? new Date(trip.get('end_date')).toDateString() : '' %>" />
         </div>
     </div>
     <div class="form-group">
@@ -367,8 +367,8 @@
       <% _.each(tripattendances, function(tripattendance) { %>
       <tr data-trip-id="<%- tripattendance.get('trip_id') %>">
         <td><a href="#/trips/<%= tripattendance.get('trip_id') %>"><%- tripattendance.get('name') %></a></td>
-        <td><%- tripattendance.get('start_date') %></td>
-        <td><%- tripattendance.get('end_date') %></td>
+        <td><%- new Date(tripattendance.get('start_date')).toDateString() %></td>
+        <td><%- new Date(tripattendance.get('end_date')).toDateString() %></td>
         <td>$<%- tripattendance.get('total') %></td>
         <td><a href="#/students/<%= tripattendance.get('student_id') %>/trips/<%= tripattendance.get('trip_id') %>" class="btn btn-default btn-xs">Donations</a></td>
       </tr>
@@ -409,7 +409,7 @@
     <h4>
         <ol class="breadcrumb">
             <li><a href="#/students/<%- donations[0].get('student_id') %>">Trips</a></li>
-            <li class="active"><%- donations[0].get('trip_name') %> (<%- donations[0].get('start_date') %> - <%- donations[0].get('end_date') %>)</li>
+            <li class="active"><%- donations[0].get('trip_name') %> (<%- new Date(donations[0].get('start_date')).toDateString() %> - <%- new Date(donations[0].get('end_date')).toDateString() %>)</li>
         </ol>
     </h4>
     <h5>Donations</h5>
