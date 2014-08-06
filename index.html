@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Student Donation Manager</title>
-  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css">
   <style type="text/css">
   .btn-float-right {
     float: right;
@@ -32,6 +32,7 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js" type="text/javascript"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 <!-- Templates -->
 
@@ -96,6 +97,7 @@
     </div>
     </div>
     <div id="student-subpanel" />
+    <div id="add-trip-placeholder" />
   </script>
 
   <script type="text/template" id="student-edit-template">
@@ -356,7 +358,12 @@
 
   <script type="text/template" id="trip-tripattendances-list-template">
   <div style="margin-top: 36px">
-  <h4>Trips</h4>
+  <div>
+      <div class="btn-float-right">
+        <button type="button"  id="add-trip-button" class="btn btn-success">Add Trip</button>
+      </div>
+      <h4>Trips</h4>
+  </div>
   <table class="table table-striped">
   <thead>
     <tr>
@@ -404,7 +411,6 @@
   </script>
 
   <script type="text/template" id="student-donations-list-template">
-  <%= console.log(donations[0]) %>
   <div style="margin-top: 36px">
     <h4>
         <ol class="breadcrumb">
@@ -431,6 +437,28 @@
   </table>
   </div>
   </script>
+
+<!-- Modal Dialogs -->
+
+    <script type="text/template" id="student-add-trip-dialog-template">
+    <div class="modal fade" id="student-add-trip-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add Trip for <%- student.get('firstname') %> <%- student.get('lastname') %></h4>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </script>
 
 <!-- Backbone -->
 
@@ -498,9 +526,24 @@
 
     var StudentDetailView = Backbone.View.extend({
         el: '.page',
+        events: {
+            "click #add-trip-button": "addTrip"
+        },
+
+        addTrip: function(ev) {
+            // show dialog
+
+            var template = _.template($('#student-add-trip-dialog-template').html(), {student: this.student});
+            this.$el.find('#add-trip-placeholder').replaceWith(template);
+
+            var modal = this.$el.find('#student-add-trip-dialog');
+            modal.modal({}); // open modal dialog
+        },
+
         render: function(options) {
             var that = this;
 
+            // store the model as a property of this View
             that.student = new Student({id: options.id});
             that.student.fetch({
                 success: function(student) {
