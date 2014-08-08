@@ -188,7 +188,7 @@
   <tbody>
       <% _.each(donors, function(donor) { %>
       <tr>
-        <td><a href="#/donors/<%= donor.id %>"><%- donor.get('firstname') %> <%- donor.get('lastname') %></td>
+        <td><a href="#/donors/<%= donor.id %>"><%- donor.get('firstname') %> <%- donor.get('lastname') %></a></td>
         <td><%- donor.get('street') %></td>
         <td><%- donor.get('city') %></td>
         <td><%- donor.get('state') %></td>
@@ -427,22 +427,24 @@
   <div style="margin-top: 36px">
     <h4>
         <ol class="breadcrumb">
-            <li><a href="#/students/<%- donations[0].get('student_id') %>">Trips</a></li>
-            <li class="active"><%- donations[0].get('trip_name') %> (<%- new Date(donations[0].get('start_date')).toDateString() %> - <%- new Date(donations[0].get('end_date')).toDateString() %>)</li>
+            <% if (donations.length > 0) {%>
+                <li><a href="#/students/<%- donations[0].get('student_id') %>">Trips</a></li>
+                <li class="active">Donations for <%- donations[0].get('trip_name') %></li>
+            <% } else { %>
+                <li class="active">No Donations Found</li>
+            <%} %>
         </ol>
     </h4>
-    <h5>Donations</h5>
   <table class="table table-striped">
   <thead>
     <tr>
-        <th>First Name</th><th>Last Name</th><th>Amount</th>
+        <th>Name</th><th>Amount</th>
     </tr>
   </thead>
   <tbody>
       <% _.each(donations, function(donation) { %>
       <tr>
-        <td><%- donation.get('donor_firstname') %></td>
-        <td><%- donation.get('donor_lastname') %></td>
+        <td><a href="#/donors/<%= donation.get('donor_id') %>"><%- donation.get('donor_firstname') %> <%- donation.get('donor_lastname') %></a></td>
         <td><%- donation.get('amount') %></td>
       </tr>
       <% }); %>
@@ -473,7 +475,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button id="student-add-trip-save-button" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+            <button id="student-add-trip-save-button" type="button" class="btn btn-primary" >Save</button>
           </div>
         </div>
       </div>
@@ -548,7 +550,7 @@
         el: '.page',
         events: {
             "click #add-trip-button": "addTrip",
-            "click #student-add-trip-save-button": "saveTrip"
+            "click #student-add-trip-save-button": "addTripToStudent"
         },
 
         addTrip: function(ev) {
@@ -590,8 +592,9 @@
             });
         },
 
-        saveTrip: function(ev) {
+        addTripToStudent: function(ev) {
             var selection = $('#add-trip-input').val();
+            $('#student-add-trip-dialog').modal('hide');
 
             if (! selection) return;
 
@@ -604,15 +607,27 @@
             var self = this;
             tripattendance.save(taDetails, {
                 success: function(tripattendance) {
-                    //alert('You saved the student');
-                    self.render();
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.student.get('id')});
+                    //router.navigate('students/' + self.student.get('id') , {trigger:true});
                 },
                 error: function(student, response, options) {
                     alert('The tripattendance could not be saved.  Please see the console log');
                     console.log(student);
                     console.log(response);
                     console.log(options);
-                    self.render();
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.student.get('id')});
 
                 }
             });
