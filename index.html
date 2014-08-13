@@ -405,18 +405,18 @@
   <table class="table table-striped">
   <thead>
     <tr>
-        <th>First Name</th><th>Last Name</th><th>City</th><th>State</th><th>Total Raised</th><th></th>
+        <th>First Name</th><th>City</th><th>State</th><th>Total Raised</th><th></th>
     </tr>
   </thead>
   <tbody>
       <% _.each(tripattendances, function(tripattendance) { %>
-      <tr data-trip-id="<%- tripattendance.get('student_id') %>">
-        <td><%- tripattendance.get('firstname') %></td>
-        <td><%- tripattendance.get('lastname') %></td>
+      <tr data-tripattendance-id="<%- tripattendance.get('id') %>">
+        <td><a href="#/students/<%= tripattendance.get('student_id') %>"><%- tripattendance.get('firstname') %> <%- tripattendance.get('lastname') %></a></td>
         <td><%- tripattendance.get('city') %></td>
         <td><%- tripattendance.get('state') %></td>
         <td>$<%- tripattendance.get('total') %></td>
-        <td><a href="/students/<%= tripattendance.get('student_id') %>" class="btn btn-default btn-xs">Details</a></td>
+        <td><a href="#/students/<%= tripattendance.get('student_id') %>/trips/<%= tripattendance.get('trip_id') %>" class="btn btn-default btn-xs">Donations</a></td>
+        <td><a><span class="glyphicon glyphicon-remove-circle deleteTripAttendanceFromTrip" style="font-size: 16px; color: grey; cursor: pointer;"></span></a></td>
       </tr>
         <% }); %>
   </tbody>
@@ -641,9 +641,9 @@
             var theTA = self.tripattendances.get(tripattendanceId);
             console.log(theTA);
 
-            if (confirm('Are you sure you want to delete this trip and all associated donations from this student?')) {
+            if (confirm('Are you sure you want to remove this trip from this student and delete all of his/her associated donations?')) {
                 theTA.destroy({
-                    success: function (student, response) {
+                    success: function (tripattendance, response) {
                         self.render({id: self.student.get('id')});
                 }});
             }
@@ -887,9 +887,29 @@
 
     var TripDetailView = Backbone.View.extend({
         el: '.page',
+        events: {
+            "click .deleteTripAttendanceFromTrip": "deleteStudentFromTrip"
+        },
+
+        deleteStudentFromTrip: function(ev) {
+            var self = this;
+            var tgt = $(ev.currentTarget).parents("tr"); // tr
+            var tripattendanceId = tgt.attr('data-tripattendance-id');
+            var theTA = self.tripattendances.get(tripattendanceId);
+            console.log(theTA);
+
+            if (confirm('Are you sure you want to remove this student from this trip and delete all of his/her associated donations?')) {
+                theTA.destroy({
+                    success: function (tripattendance, response) {
+                        self.render({id: self.trip.get('id')});
+                }});
+            }
+        },
+
         render: function(options) {
             var that = this;
 
+            // store the model as a property of this View
             that.trip = new Trip({id: options.id});
             that.trip.fetch({
                 success: function(trip) {
@@ -900,8 +920,9 @@
             });
 
             var fetchTripAttendance = function() {
-                var tripattendances = new TripAttendances();
-                tripattendances.fetch({
+                // store the collection as a property of this view
+                that.tripattendances = new TripAttendances();
+                that.tripattendances.fetch({
                     data: {tripId: that.trip.id},
                     success: function(tripattendances) {
                         var template = _.template($('#student-tripattendances-list-template').html(), {tripattendances: tripattendances.models});
