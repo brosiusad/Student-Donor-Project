@@ -332,6 +332,7 @@
     </div>
     </div>
     <div id="student-tripattendances-list" />
+    <div id="add-student-placeholder" />
   </script>
 
   <script type="text/template" id="trip-edit-template">
@@ -401,7 +402,12 @@
 
   <script type="text/template" id="student-tripattendances-list-template">
   <div style="margin-top: 36px">
-  <h4>Sponsored Students</h4>
+  <div>
+      <div class="btn-float-right">
+        <button type="button"  id="add-student-button" class="btn btn-success">Add Student</button>
+      </div>
+      <h4>Sponsored Students</h4>
+  </div>
   <table class="table table-striped">
   <thead>
     <tr>
@@ -477,6 +483,33 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             <button id="student-add-trip-save-button" type="button" class="btn btn-primary" >Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </script>
+
+    <script type="text/template" id="trip-add-student-dialog-template">
+    <div class="modal fade" id="trip-add-student-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add Student for <%- trip.get('name') %></h4>
+          </div>
+          <div class="modal-body">
+              <form id="trip-add-student-form" class="form-horizontal" role="form">
+                <div class="form-group ui-widget">
+                    <label for="student-input" class="col-sm-3 control-label">Student Name</label>
+                    <div class="col-sm-9">
+                        <input id="add-student-input" type="text" />
+                    </div>
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button id="trip-add-student-save-button" type="button" class="btn btn-primary" >Save</button>
           </div>
         </div>
       </div>
@@ -574,15 +607,17 @@
                         choices.push(trip.get('name'));
                     });
 
-                    if (trips.length == 0) alert('No trips found');
+                    if (trips.length == 0) {
+                        alert('No trips found');
+                    } else {
 
-                    $('#add-trip-input').autocomplete({
-                        source: choices
-                    });
+                        $('#add-trip-input').autocomplete({
+                            source: choices
+                        });
 
-                    var modal = self.$el.find('#student-add-trip-dialog');
-                    modal.modal({}); // open modal dialog
-
+                        var modal = self.$el.find('#student-add-trip-dialog');
+                        modal.modal({}); // open modal dialog
+                    }
 
                 },
                 error: function(trips, response, options) {
@@ -888,7 +923,92 @@
     var TripDetailView = Backbone.View.extend({
         el: '.page',
         events: {
+            "click #add-student-button": "addStudent",
+            "click #trip-add-student-save-button": "addStudentToTrip",
             "click .deleteTripAttendanceFromTrip": "deleteStudentFromTrip"
+        },
+
+        addStudent: function(ev) {
+            // show dialog
+
+            var template = _.template($('#trip-add-student-dialog-template').html(), {trip: this.trip});
+            this.$el.find('#add-student-placeholder').replaceWith(template);
+
+            // fetch data for autocomplete
+            var choices = [];
+            var self = this;
+            self.students = new Students();
+            self.students.fetch({
+                success: function(students) {
+                    console.log(students);
+                    console.log(typeof students);
+                    _.each(students.models, function(student, index, list) {
+                        choices.push(student.get('lastname') + ', ' + student.get('firstname'));
+                    });
+
+                    if (students.length == 0) {
+                        alert('No students found');
+                    } else {
+
+                        $('#add-student-input').autocomplete({
+                            source: choices
+                        });
+
+                        var modal = self.$el.find('#trip-add-student-dialog');
+                        modal.modal({}); // open modal dialog
+                    }
+
+                },
+                error: function(students, response, options) {
+                    console.log(students);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+        },
+
+        addStudentToTrip: function(ev) {
+            var selection = $('#add-student-input').val();
+            $('#trip-add-student-dialog').modal('hide');
+
+            if (! selection) return;
+
+            // create tripattendance record here
+            var names = selection.split(', ');
+            console.log(selection);
+            console.log(names);
+            var student = this.students.findWhere({lastname: names[0], firstname: names[1]});
+            console.log(student.toJSON());
+
+            var tripattendance = new TripAttendance();
+            var taDetails = {student_id: student.get('id'), trip_id: this.trip.get('id')};
+            var self = this;
+            tripattendance.save(taDetails, {
+                success: function(tripattendance) {
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.trip.get('id')});
+                    //router.navigate('students/' + self.student.get('id') , {trigger:true});
+                },
+                error: function(student, response, options) {
+                    alert('The tripattendance could not be saved.  Please see the console log');
+                    console.log(student);
+                    console.log(response);
+                    console.log(options);
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.student.get('id')});
+
+                }
+            });
         },
 
         deleteStudentFromTrip: function(ev) {
