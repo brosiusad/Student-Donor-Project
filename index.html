@@ -230,6 +230,39 @@
         <div class="col-md-4"><%= donor ? donor.get('zip') : '' %> </div>
     </div>
     </div>
+    <div id="donor-donations-list" />
+  </script>
+
+  <script type="text/template" id="donor-donations-list-template">
+  <div style="margin-top: 36px">
+  <div>
+      <div class="btn-float-right">
+        <button type="button"  id="add-donation-to-donor-button" class="btn btn-success">Add Donation</button>
+      </div>
+      <h4>Donations</h4>
+  </div>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Trip</th><th>Student</th><th>Donation Date</th><th>Amount</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+      <% _.each(donations, function(donation) { %>
+      <tr data-donation-id="<%- donation.get('donation_id') %>">
+        <td><a href="#/trips/<%= donation.get('trip_id') %>"><%- donation.get('trip_name') %></a></td>
+        <td><a href="#/students/<%= donation.get('student_id') %>"><%- donation.get('student_firstname') %> <%- donation.get('student_lastname') %></a></td>
+        <td>Need a date here</td>
+        <td>$<%- donation.get('amount') %></td>
+        <td><a><span class="glyphicon glyphicon-remove-circle deleteDonorDonation" style="font-size: 16px; color: grey; cursor: pointer;"></span></a></td>
+      </tr>
+        <% }); %>
+  </tbody>
+  </table>
+    <% if (donations.length == 0) {%>
+        <div class="alert alert-info" role="alert">No Donations Found</div>
+    <% }%>
+  </div>
   </script>
 
  <script type="text/template" id="donor-edit-template">
@@ -397,6 +430,9 @@
         <% }); %>
   </tbody>
   </table>
+    <% if (tripattendances.length == 0) {%>
+        <div class="alert alert-info" role="alert">No Trips Found</div>
+    <% }%>
   </div>
   </script>
 
@@ -427,6 +463,9 @@
         <% }); %>
   </tbody>
   </table>
+    <% if (tripattendances.length == 0) {%>
+        <div class="alert alert-info" role="alert">No Students Found</div>
+    <% }%>
   </div>
   </script>
 
@@ -434,12 +473,12 @@
   <div style="margin-top: 36px">
     <h4>
         <ol class="breadcrumb">
-            <% if (donations.length > 0) {%>
+            <% if (donations.length > 0) { %>
                 <li><a href="#/students/<%- donations[0].get('student_id') %>">Trips</a></li>
                 <li class="active">Donations for <%- donations[0].get('trip_name') %></li>
             <% } else { %>
                 <li class="active">No Donations Found</li>
-            <%} %>
+            <% } %>
         </ol>
     </h4>
   <table class="table table-striped">
@@ -832,8 +871,27 @@
                 success: function(donor) {
                     var template = _.template($('#donor-detail-template').html(), {donor: donor});
                     that.$el.html(template);
+
+                    fetchDonations();
                 }
             });
+
+            var fetchDonations = function() {
+                // store the collection as a property of this view
+                that.donations = new Donations();
+                that.donations.fetch({
+                    data: {donorId: that.donor.id},
+                    success: function(donations) {
+                        var template = _.template($('#donor-donations-list-template').html(), {donations: donations.models});
+                        that.$el.find("#donor-donations-list").html(template);
+                    },
+                    error: function(donations, response, options) {
+                        console.log(donations);
+                        console.log(response);
+                        console.log(options);
+                    }
+                });
+            }
         }
     });
 
