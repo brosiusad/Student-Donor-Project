@@ -534,39 +534,6 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <h4 class="modal-title" id="myModalLabel">Add Donation</h4>
-          </div>
-          <div class="modal-body">
-              <form id="donor-add-donation-form" class="form-horizontal" role="form">
-                <div class="form-group ui-widget">
-                    <label for="add-trip-for-donor-input" class="col-sm-3 control-label">Trip Name</label>
-                    <div class="col-sm-9" style="padding-top:5px">
-                        <input id="add-trip-for-donor-input" type="text" />
-                    </div>
-                </div>
-                <div class="form-group ui-widget">
-                    <label for="add-student-for-donor-input" class="col-sm-3 control-label">Student Name</label>
-                    <div class="col-sm-9" style="padding-top:5px">
-                        <input id="add-student-for-donor-input" type="text" />
-                    </div>
-                </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button id="donor-add-donation-save-button" type="button" class="btn btn-primary" >Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    </script>
-
-    <script type="text/template" id="donor-add-donation-dialog-template">
-    <div class="modal fade" id="donor-add-donation-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h4 class="modal-title" id="myModalLabel">Add Student for <%- trip.get('name') %></h4>
           </div>
           <div class="modal-body">
@@ -587,6 +554,41 @@
       </div>
     </div>
     </script>
+
+
+    <script type="text/template" id="donor-add-donation-dialog-template">
+    <div class="modal fade" id="donor-add-donation-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add Donation</h4>
+          </div>
+          <div class="modal-body">
+              <form id="donor-add-donation-form" class="form-horizontal" role="form">
+                <div class="form-group ui-widget">
+                    <label for="add-student-for-donor-input" class="col-sm-3 control-label">Student Name</label>
+                    <div class="col-sm-9" style="padding-top:5px">
+                        <input id="add-student-for-donor-input" type="text" />
+                    </div>
+                </div>
+                <div class="form-group ui-widget">
+                    <label for="add-trip-for-donor-input" class="col-sm-3 control-label">Trip Name</label>
+                    <div class="col-sm-9" style="padding-top:5px">
+                        <input id="add-trip-for-donor-input" type="text" />
+                    </div>
+                </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button id="donor-add-donation-save-button" type="button" class="btn btn-primary" >Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </script>
+
 
 <!-- Backbone -->
 
@@ -896,6 +898,14 @@
 
     var DonorDetailView = Backbone.View.extend({
         el: '.page',
+        events: {
+            'click #donor-add-donation-dialog-template': "addDonation"
+        },
+
+        addDonation: function(ev) {
+            var template = _.template($('#donor-add-donation-dialog-template').html());
+        },
+
         render: function(options) {
             var that = this;
 
