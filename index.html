@@ -231,6 +231,7 @@
     </div>
     </div>
     <div id="donor-donations-list" />
+    <div id="add-donation-placeholder" />
   </script>
 
   <script type="text/template" id="donor-donations-list-template">
@@ -249,7 +250,7 @@
   </thead>
   <tbody>
       <% _.each(donations, function(donation) { %>
-      <tr data-donation-id="<%- donation.get('donation_id') %>">
+      <tr data-donation-id="<%- donation.get('id') %>">
         <td><a href="#/trips/<%= donation.get('trip_id') %>"><%- donation.get('trip_name') %></a></td>
         <td><a href="#/students/<%= donation.get('student_id') %>"><%- donation.get('student_firstname') %> <%- donation.get('student_lastname') %></a></td>
         <td>Need a date here</td>
@@ -555,7 +556,6 @@
     </div>
     </script>
 
-
     <script type="text/template" id="donor-add-donation-dialog-template">
     <div class="modal fade" id="donor-add-donation-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -567,15 +567,21 @@
           <div class="modal-body">
               <form id="donor-add-donation-form" class="form-horizontal" role="form">
                 <div class="form-group ui-widget">
-                    <label for="add-student-for-donor-input" class="col-sm-3 control-label">Student Name</label>
-                    <div class="col-sm-9" style="padding-top:5px">
-                        <input id="add-student-for-donor-input" type="text" />
-                    </div>
-                </div>
-                <div class="form-group ui-widget">
                     <label for="add-trip-for-donor-input" class="col-sm-3 control-label">Trip Name</label>
                     <div class="col-sm-9" style="padding-top:5px">
                         <input id="add-trip-for-donor-input" type="text" />
+                    </div>
+                </div>
+                <div class="form-group ui-widget">
+                    <label for="add-student-for-donor-input" class="col-sm-3 control-label">Student Name</label>
+                    <div class="col-sm-9" style="padding-top:5px">
+                        <input id="add-student-for-donor-input" type="text" disabled/>
+                    </div>
+                </div>
+                <div class="form-group ui-widget">
+                    <label for="add-donation-for-donor-input" class="col-sm-3 control-label">Amount</label>
+                    <div class="col-sm-9" style="padding-top:5px">
+                        <input id="add-donation-for-donor-input" type="text" disabled/>
                     </div>
                 </div>
             </form>
@@ -899,11 +905,154 @@
     var DonorDetailView = Backbone.View.extend({
         el: '.page',
         events: {
-            'click #donor-add-donation-dialog-template': "addDonation"
+            'click #add-donation-to-donor-button': "addDonation",
+            'click #donor-add-donation-save-button': "addDonationForDonor",
+            'click .deleteDonorDonation': "deleteDonationFromDonor"
         },
 
         addDonation: function(ev) {
-            var template = _.template($('#donor-add-donation-dialog-template').html());
+            var template = _.template($('#donor-add-donation-dialog-template').html(), {donor: this.donor});
+            this.$el.find('#add-donation-placeholder').replaceWith(template);
+
+            // fetch trips data for autocomplete
+            var choices = [];
+            var self = this;
+            self.trips = new Trips();
+            self.trips.fetch({
+                success: function(trips) {
+                    console.log(trips);
+                    console.log(typeof trips);
+                    var theTrips = _.sortBy(trips.models, 'name'); // sort results (which were returned in DESC order of date)
+                    _.each(theTrips, function(trip, index, list) {
+                        choices.push(trip.get('name'));
+                    });
+
+                    if (trips.length == 0) {
+                        alert('No trips found');
+                    } else {
+
+                        $('#add-trip-for-donor-input').autocomplete({
+                            source: choices
+                        });
+
+                        $('#add-trip-for-donor-input').on("blur change", function(event) {
+                            self.populateStudentChoices();
+                        });
+
+                        var modal = self.$el.find('#donor-add-donation-dialog');
+                        modal.modal({}); // open modal dialog
+                    }
+
+                },
+                error: function(trips, response, options) {
+                    console.log(trips);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+
+
+        },
+
+        populateStudentChoices: function() {
+            var selection = $('#add-trip-for-donor-input').val();
+
+            if (! selection) return;
+
+            // find trip user selected
+            var trip = this.trips.findWhere({name: selection});
+
+            // fetch student data for autocomplete
+            // only get students for this trip
+            var choices = [];
+            var self = this;
+            self.tripattendances = new TripAttendances();
+            self.tripattendances.fetch({
+                data: {tripId: trip.id},
+                success: function(tripattendance) {
+                    console.log(tripattendance);
+                    console.log(typeof tripattendance);
+                    _.each(tripattendance.models, function(student, index, list) {
+                        choices.push(student.get('lastname') + ', ' + student.get('firstname'));
+                    });
+
+                    if (tripattendance.length == 0) {
+                        alert('No tripattendance found');
+                    } else {
+
+                        // add student choices and enable input
+                        $('#add-student-for-donor-input')
+                        .autocomplete({
+                            source: choices
+                        })
+                        .removeAttr("disabled")
+                        .focus();
+
+                        $('#add-donation-for-donor-input').removeAttr('disabled');
+                    }
+
+                },
+                error: function(tripattendances, response, options) {
+                    console.log(tripattendances);
+                    console.log(response);
+                    console.log(options);
+                }
+            });
+
+        },
+
+        addDonationForDonor: function() {
+            var self = this;
+            var tripSelection = $('#add-trip-for-donor-input').val();
+            var studentSelection = $('#add-student-for-donor-input').val();
+            var amount = $('#add-donation-for-donor-input').val();
+            if (!tripSelection || !studentSelection || !amount) return;
+
+            // find student amongst TripAttendances
+            var names = studentSelection.split(",");
+            var tripattendance = this.tripattendances.findWhere({lastname: names[0].trim(), firstname: names[1].trim()});
+            console.log(tripattendance);
+
+            var donation = new Donation();
+            var donationDetails = {trip_attendance_id: tripattendance.id, donor_id: this.donor.id, amount: amount};
+            donation.save(donationDetails, {
+                success: function(donation) {
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.donor.get('id')});
+
+                },
+                error: function(donation, response, options) {
+
+                    // hack to hide modal backdrop if it didn't get destroyed correctly
+                    // see http://stackoverflow.com/questions/11519660/twitter-bootstrap-modal-backdrop-doesnt-disappear
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+
+                    self.render({id: self.donor.get('id')});
+                }
+            });
+
+        },
+
+        deleteDonationFromDonor: function(ev) {
+            var self = this;
+            var tgt = $(ev.currentTarget).parents("tr"); // tr
+            var donationId = tgt.attr('data-donation-id');
+            var theDonation = self.donations.get(donationId);
+            console.log(theDonation);
+
+            if (confirm('Are you sure you want to delete this donation?')) {
+                theDonation.destroy({
+                    success: function (donation, response) {
+                        self.render({id: self.donor.get('id')});
+                }});
+            }
+
         },
 
         render: function(options) {
